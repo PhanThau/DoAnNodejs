@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-3">
+        <h1>Category Management System</h1>
+        <button class="btn btn-primary mb-2" onclick="document.getElementById('create-category-modal').style.display='block'">New Category</button>
+
+        <!-- Category List Table -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">STT</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="categories-list">
+                <!-- Categories will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for creating new category -->
+    <div id="create-category-modal" style="display:none; background-color: rgba(0,0,0,0.5); position:fixed; top:0; left:0; width:100%; height:100%;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Category</h5>
+                    <button type="button" class="close" onclick="document.getElementById('create-category-modal').style.display='none'">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-category-form">
+                        <div class="form-group">
+                            <label for="category-name">Category Name</label>
+                            <input type="text" class="form-control" id="category-name" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Category</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load categories on page load
+        document.addEventListener('DOMContentLoaded', fetchCategories);
+
+        async function fetchCategories() {
+            const response = await fetch('/categories');
+            const categories = await response.json();
+            const list = document.getElementById('categories-list');
+            list.innerHTML = '';
+            categories.forEach((category, index) => {
+                const row = `<tr>
+                                <th scope="row">${index + 1}</th>
+                                <td>${category.name}</td>
+                                <td>
+                                    <button class="btn btn-info btn-sm" onclick="updateCategory('${category._id}', '${category.name}')">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteCategory('${category._id}')">Delete</button>
+                                </td>
+                            </tr>`;
+                list.innerHTML += row;
+            });
+        }
+
+        document.getElementById('create-category-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('category-name').value;
+            const response = await fetch('/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            const result = await response.json();
+            console.log(result);
+            fetchCategories();
+            document.getElementById('create-category-modal').style.display = 'none'; // Close modal after creation
+        });
+
+        async function updateCategory(id, currentName) {
+            const newName = prompt("Enter new category name", currentName);
+            if (newName && newName !== currentName) {
+                const response = await fetch(`/categories/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: newName })
+                });
+                const result = await response.json();
+                console.log(result);
+                fetchCategories();
+            }
+        }
+
+        async function deleteCategory(id) {
+            if (confirm("Are you sure you want to delete this category?")) {
+                const response = await fetch(`/categories/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                console.log(result);
+                fetchCategories();
+            }
+        }
+    </script>
+    <!-- Include Bootstrap JS and Popper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

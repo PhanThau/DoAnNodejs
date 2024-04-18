@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloth Management</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-3">
+        <h1>Cloth Management System</h1>
+        <button class="btn btn-primary mb-2" onclick="document.getElementById('create-cloth-modal').style.display='block'">Add New Cloth</button>
+
+        <!-- Cloth List Table -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quality</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="clothes-list">
+                <!-- Clothes will be inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Pagination and Sorting -->
+        <div>
+            <button onclick="prevPage()">Previous</button>
+            <span id="page-info"></span>
+            <button onclick="nextPage()">Next</button>
+            <select onchange="changeSort(this.value)">
+                <option value="title">Sort by Title</option>
+                <option value="-price">Sort by Price Descending</option>
+                <option value="price">Sort by Price Ascending</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Modal for adding new cloth -->
+    <div id="create-cloth-modal" style="display:none; background-color: rgba(0,0,0,0.5); position:fixed; top:0; left:0; width:100%; height:100%;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Cloth</h5>
+                    <button type="button" class="close" onclick="document.getElementById('create-cloth-modal').style.display='none'">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-cloth-form">
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" class="form-control" id="title" required>
+                            <label for="category">Category</label>
+                            <input type="text" class="form-control" id="category" required>
+                            <label for="size">Size</label>
+                            <input type="text" class="form-control" id="size" required>
+                            <label for="price">Price</label>
+                            <input type="number" class="form-control" id="price" required>
+                            <label for="quality">Quality</label>
+                            <input type="number" class="form-control" id="quality" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Cloth</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let currentSort = 'title';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchClothes();
+        });
+
+        document.getElementById('create-cloth-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const title = document.getElementById('title').value;
+            const category = document.getElementById('category').value;
+            const size = document.getElementById('size').value;
+            const price = document.getElementById('price').value;
+            const quality = document.getElementById('quality').value;
+            const response = await fetch('/cloths', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, category, size, price, quality })
+            });
+            const result = await response.json();
+            console.log(result);
+            fetchClothes();
+            document.getElementById('create-cloth-modal').style.display = 'none';
+        });
+
+        async function fetchClothes() {
+            const response = await fetch(`/cloths?page=${currentPage}&sort=${currentSort}`);
+            const data = await response.json();
+            const list = document.getElementById('clothes-list');
+            list.innerHTML = '';
+            data.forEach((cloth, index) => {
+                const row = `<tr>
+                                <th scope="row">${index + 1}</th>
+                                <td>${cloth.title}</td>
+                                <td>${cloth.category.name}</td>
+                                <td>${cloth.size.name}</td>
+                                <td>${cloth.price}</td>
+                                <td>${cloth.quality}</td>
+                                <td>
+                                    <button class="btn btn-info">Edit</button>
+                                    <button class="btn btn-danger">Delete</button>
+                                </td>
+                            </tr>`;
+                list.appendChild(row);
+            });
+            document.getElementById('page-info').textContent = `Page ${currentPage}`;
+        }
+
+        function nextPage() {
+            currentPage++;
+            fetchClothes();
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchClothes();
+            }
+        }
+
+        function changeSort(sort) {
+            currentSort = sort;
+            fetchClothes();
+        }
+    </script>
+    <!-- Include Bootstrap JS and jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

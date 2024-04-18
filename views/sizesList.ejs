@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Sizes</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <style>
+        body { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- Main content -->
+    <div class="container mt-4">
+        <h1 class="mb-4">All Sizes</h1>
+        <!-- Add Size Button -->
+        <button type="button" class="btn btn-success mb-3">Add New Size</button>
+
+        <% if (sizes.length > 0) { %>
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% sizes.forEach(function(size, index) { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= size.name %></td>
+                            <td>
+                                <!-- Edit and Delete Buttons -->
+                                <button type="button" class="btn btn-primary btn-sm">Edit</button>
+                                <button type="button" class="btn btn-danger btn-sm">Delete</button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div class="alert alert-warning" role="alert">
+                No sizes found.
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
